@@ -23,7 +23,13 @@ moves = ((-1, 0), (1, 0), (0, -1), (0, 1))
 maxclimb = 1
 
 step = 0
-steplocs = {S}
+steplocs = set()
+
+for ri, row in enumerate(ele):
+    for ci, e in enumerate(row):
+        if e == 0:
+            steplocs.add((ri, ci))
+
 while (E not in steplocs):
     step += 1
     # print(f'=== STEP {step} ===')
