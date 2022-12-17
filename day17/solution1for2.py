@@ -12,7 +12,7 @@ else:
 
 jets_ = lines[0]
 
-rocks = [
+rocks_ = [
     (0, 1, 2, 3),
     (1,0-1j,1-1j,2-1j,1-2j),
     (0,1,2,2-1j,2-2j),
@@ -29,10 +29,12 @@ C = set()
 Y = 0
 
 jets = itertools.cycle(jets_)
-rocks = enumerate(itertools.cycle(rocks), 1)
+rocks = enumerate(itertools.cycle(rocks_), 1)
 
 rock = None
-for j in jets:
+rockjets = []
+for ji, j in enumerate(jets):
+    rockjets.append(j)
     if rock is None:
         n, rock = next(rocks)
         #print(n)
@@ -64,8 +66,20 @@ for j in jets:
     C1 = {c+c2 for c in rock}
     y1 = min(c.imag for c in C1)
     Y = max(Y, int(-y1))
-    print(f'rock {n} rest: {C1}; tower: {Y}')
+    #print(f'rock {n} rest: {C1}; tower: {Y}')
     #print(Y)
     #input()
     C |= C1
+
+
+    CCC = [0 for _ in range(W)]
+    for i in range(W):
+        try:
+            CCC[i] = max([int(-x.imag) for x in C if x.real==i+1])
+        except ValueError:
+            pass
+    print(f'ri={n-1} ({(n-1)%len(rocks_)}); j={ji+1} ({(ji+1)%len(jets_)}); [{"".join(rockjets)}]')
+    #print(f'{CCC}')
+
     rock = None
+    rockjets = []

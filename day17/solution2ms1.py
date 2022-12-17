@@ -29,8 +29,6 @@ ROCKSo = tuple(tuple(itertools.accumulate(r, int.__ror__))[-1] for r in ROCKS)
 
 ABOVE = 4
 
-history = {}
-
 C = collections.deque((0xFF,))
 T = 0
 
@@ -80,42 +78,11 @@ while ri < N:
         C[d-rxi] |= r[rxi-1]
     C.extendleft(r[rxi:])
     T += max(len(r) - d, 0)
-
-    #print(f'ri={ri} ({rii}); j={ji} ({jii}); [{"".join(["<>"[x] for x in rockjets])}]')
-
-    # DEAD END
-    #if not rii:
-    #    b = 0
-    #    for i, x in enumerate(C):
-    #        b |= x
-    #        if b == 0x7F: break
-    #    Ct = tuple(C)[:i+1]
-    #    C = collections.deque(Ct)
-    #    ji1 = history.setdefault(Ct, ji)
-    #    if ji1 != ji:
-    #        raise Exception
-
-    if C[0] == 0x7F:
-        C = collections.deque((0x7F,))
-        T0, ri0 = history.setdefault((jii, rii), (T, ri))
-        if ri0 != ri:
-            nrocks = ri-ri0
-            Td = T - T0
-            fcyc, rem = divmod(N-1-ri, nrocks)
-            rfw = nrocks * fcyc
-            Tfw = Td * fcyc
-            print(f'match found between rocks {ri0+1} and {ri+1} (count: {nrocks})')
-            ri += rfw
-            print(f'fast forward {nrocks} * {fcyc} = {rfw} rocks to {ri}')
-            T += Tfw
-            print(f'tower increased by {Td} * {fcyc} = {Tfw} to {T}')
-            print("simulation continues")
-
-
-            #raise Exception
-
-        #raise Exception
-
+    print(f'n={ri} ({rii}); j={ji} ({jii}); [{"".join(["<>"[x] for x in rockjets])}]')
+    #print(f'{C}')
     ri += 1
+    #print("".join([" ><"[x] for x in rockjets]))
+    #print(f'settled: {x}; {C}; {T}; {d}')
+    #input()
 
 print(T)
