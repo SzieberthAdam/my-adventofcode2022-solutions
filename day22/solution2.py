@@ -53,22 +53,42 @@ turnmap = {
     (0, "L"): 3,
 }
 
-fd = {
-    1: (0, 1),
-    2: (0, 2),
-    3: (1, 1),
-    4: (2, 0),
-    5: (2, 1),
-    6: (3, 0),
-}
+if len(lines) < 100:  #example
+    fd = {
+        1: (0, 2),
+        2: (1, 0),
+        3: (1, 1),
+        4: (1, 2),
+        5: (2, 2),
+        6: (2, 3),
+    }
 
-fc = (
-    ((1, 0), (2, 0), (5, 2), (4, 2), (1, 0)),
-    ((1, 1), (3, 1), (5, 1), (6, 2), (1, 1)),
-    ((2, 1), (3, 2), (4, 1), (6, 1), (2, 1)),
-)
+    fc = (
+        ((1, 0), (6, 2), (5, 2), (3, 3), (1, 0)),
+        ((1, 1), (4, 1), (5, 1), (2, 3), (1, 1)),
+        ((2, 0), (3, 0), (4, 0), (6, 1), (2, 0)),
+    )
 
-FSIZE = 50
+    FSIZE = 4
+
+else:
+    fd = {
+        1: (0, 1),
+        2: (0, 2),
+        3: (1, 1),
+        4: (2, 0),
+        5: (2, 1),
+        6: (3, 0),
+    }
+
+    fc = (
+        ((1, 0), (2, 0), (5, 2), (4, 2), (1, 0)),
+        ((1, 1), (3, 1), (5, 1), (6, 2), (1, 1)),
+        ((2, 1), (3, 2), (4, 1), (6, 1), (2, 1)),
+    )
+
+    FSIZE = 50
+
 
 def getf(r, c):
     for f, t in fd.items():
@@ -85,19 +105,19 @@ facestep = ((0, 1), (1, 0), (0, -1), (-1, 0))
 
 transfer = {
     (0, 0): None,#((1, 1, 0), (1, 0, 0)),
-    (0, 1): None,
+    (0, 1): ((0, 0, 0), (1, 1, 0)),
     (0, 2): ((1, 1, 0), (1, 0, 0)),
     (0, 3): ((1, 0, 0), (0, 1, 0)),
-    (1, 0): None,
+    (1, 0): ((1, 0, 1), (0, 0, 0)),
     (1, 1): ((0, 0, 0), (0, 0, 1)),
     (1, 2): ((0, 0, 1), (1, 0, 0)),
-    (1, 3): None,
+    (1, 3): ((1, 0, 0), (1, 0, 1)),
     (2, 0): ((1, 1, 0), (0, 0, 0)),
     (2, 1): ((0, 0, 0), (0, 1, 0)),
     (2, 2): None,
     (2, 3): None,
     (3, 0): ((0, 0, 1), (0, 0, 0)),
-    (3, 1): None,
+    (3, 1): ((0, 0, 0), (1, 0, 1)),
     (3, 2): None,
     (3, 3): ((1, 0, 0), (0, 0, 1)),
 }
@@ -109,8 +129,8 @@ def step(r, c, face):
     if (r1, c1) not in fields:
         f = getf(r, c)
         key = (f, face)
-        print("not in: ", (r, c), (r1, c1), key)
-        print((r, c, face), (r1, c1, face1))
+        #print("not in: ", (r, c), (r1, c1), key)
+        #print((r, c, face), (r1, c1, face1))
         for i in range(3):
             fc1 = fc[i]
             try: j = fc1.index(key)
@@ -120,13 +140,13 @@ def step(r, c, face):
         else:
             for i in range(3):
                 fc1 = tuple((t[0], (t[1] + 2) % 4) for t in reversed(fc[i]))
-                print(i, fc1, key)
+                #print(i, fc1, key)
                 try: j = fc1.index(key)
                 except: continue
                 key1 = fc1[j+1]
                 break
             else:
-                print(key, r, c)
+                #print(key, r, c)
                 raise Exception
         f1, face1 = key1
         trr, trc = transfer[(face, face1)]
@@ -138,7 +158,8 @@ def step(r, c, face):
         r1 += rbem * ( rrm * (r-r0) + rcm * (c-c0))
         cbem = -1 if cbe else 1
         c1 += cbem * ( crm * (r-r0) + ccm * (c-c0))
-        print(f, key, fc1, j, key1, transfer[(face, face1)], getcorner(f1, rbe, cbe), r1, c1, rbem, cbem)
+        #print(f, key, fc1, j, key1, transfer[(face, face1)], getcorner(f1, rbe, cbe), r1, c1, rbem, cbem)
+        print(f'OVER EDGE [{r1+1}, {c1+1}, {face1}]')
     return r1, c1, face1
 
 fturn = {
@@ -168,11 +189,14 @@ for chunk in plan:
     nsteps = int("".join(steps))
     face = turnmap[face, turn]
     for stepi in range(nsteps):
-        r1, c1, face = step(r, c, face)
+        r1, c1, face1 = step(r, c, face)
         if (r1, c1) in walls:
-            print("wall")
+            print(f'[{r+1}, {c+1}, {face}] & WALL')
             break
         else:
             r, c = r1, c1
+            face = face1
+    else:
+        print(f'[{r+1}, {c+1}, {face}]')
 
-print(1000*r + 4 *c + face)
+print(1000*(r+1) + 4 *(c+1) + face)
